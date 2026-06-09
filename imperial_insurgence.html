@@ -1,0 +1,624 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>THE IMPERIAL INSURGENCE</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Share+Tech+Mono&display=swap" rel="stylesheet" />
+<style>
+  :root {
+    --red: #e02020;
+    --red-bright: #ff3333;
+    --red-dim: #8b0000;
+    --grid-color: rgba(180, 20, 20, 0.07);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: #050505;
+    font-family: 'Share Tech Mono', monospace;
+    min-height: 100vh;
+    overflow-x: hidden;
+    position: relative;
+  }
+
+  /* Grid background */
+  .grid-bg {
+    position: fixed;
+    inset: 0;
+    background-image:
+      linear-gradient(var(--grid-color) 1px, transparent 1px),
+      linear-gradient(90deg, var(--grid-color) 1px, transparent 1px);
+    background-size: 40px 40px;
+    z-index: 0;
+    pointer-events: none;
+  }
+
+  /* Animated wave layers */
+  .wave-container {
+    position: fixed;
+    inset: 0;
+    z-index: 1;
+    pointer-events: none;
+    overflow: hidden;
+  }
+
+  .wave {
+    position: absolute;
+    width: 200%;
+    height: 2px;
+    background: linear-gradient(90deg, transparent 0%, #ff000066 20%, #ff0000cc 50%, #ff000066 80%, transparent 100%);
+    animation: sweep linear infinite;
+    filter: blur(1px);
+  }
+
+  .wave:nth-child(1) { top: 20%; animation-duration: 6s; animation-delay: 0s; opacity: 0.6; }
+  .wave:nth-child(2) { top: 45%; animation-duration: 9s; animation-delay: -2s; opacity: 0.4; height: 1px; }
+  .wave:nth-child(3) { top: 68%; animation-duration: 7s; animation-delay: -4s; opacity: 0.5; }
+  .wave:nth-child(4) { top: 85%; animation-duration: 11s; animation-delay: -1s; opacity: 0.3; height: 1px; }
+  .wave:nth-child(5) { top: 33%; animation-duration: 8s; animation-delay: -3s; opacity: 0.35; height: 3px; filter: blur(2px); }
+
+  @keyframes sweep {
+    0%   { transform: translateX(-100%); }
+    100% { transform: translateX(0%); }
+  }
+
+  /* Central aura glow */
+  .aura {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 700px;
+    height: 700px;
+    border-radius: 50%;
+    background: radial-gradient(ellipse at center, rgba(200,0,0,0.06) 0%, rgba(150,0,0,0.03) 40%, transparent 70%);
+    animation: breathe 4s ease-in-out infinite;
+    z-index: 1;
+    pointer-events: none;
+  }
+
+  @keyframes breathe {
+    0%, 100% { opacity: 0.6; transform: translate(-50%, -50%) scale(1); }
+    50%       { opacity: 1;   transform: translate(-50%, -50%) scale(1.12); }
+  }
+
+  /* Scanline overlay */
+  .scanlines {
+    position: fixed;
+    inset: 0;
+    background: repeating-linear-gradient(
+      0deg,
+      transparent,
+      transparent 2px,
+      rgba(0,0,0,0.08) 2px,
+      rgba(0,0,0,0.08) 4px
+    );
+    z-index: 2;
+    pointer-events: none;
+  }
+
+  /* Main content */
+  .content {
+    position: relative;
+    z-index: 10;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem;
+    gap: 2rem;
+  }
+
+  /* Emblem */
+  .emblem-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1.5rem;
+    animation: fadeDown 1.2s ease-out both;
+  }
+
+  @keyframes fadeDown {
+    from { opacity: 0; transform: translateY(-24px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  .emblem-svg {
+    width: 120px;
+    height: 120px;
+    filter:
+      drop-shadow(0 0 12px rgba(255,50,50,0.9))
+      drop-shadow(0 0 28px rgba(255,0,0,0.5))
+      drop-shadow(0 0 50px rgba(200,0,0,0.3));
+    animation: emblemPulse 3s ease-in-out infinite;
+  }
+
+  @keyframes emblemPulse {
+    0%, 100% { filter: drop-shadow(0 0 10px rgba(255,50,50,0.8)) drop-shadow(0 0 25px rgba(255,0,0,0.45)) drop-shadow(0 0 50px rgba(200,0,0,0.25)); }
+    50%       { filter: drop-shadow(0 0 18px rgba(255,80,80,1))   drop-shadow(0 0 40px rgba(255,0,0,0.7))  drop-shadow(0 0 80px rgba(200,0,0,0.45)); }
+  }
+
+  .faction-title {
+    font-family: 'Orbitron', monospace;
+    font-weight: 900;
+    font-size: clamp(1.4rem, 4vw, 2.6rem);
+    letter-spacing: 0.18em;
+    color: #fff;
+    text-align: center;
+    text-shadow:
+      0 0 8px rgba(255,255,255,0.9),
+      0 0 20px rgba(255,60,60,0.8),
+      0 0 40px rgba(220,0,0,0.6),
+      0 0 70px rgba(180,0,0,0.4);
+    line-height: 1.2;
+  }
+
+  /* Divider line */
+  .divider {
+    width: min(500px, 90vw);
+    height: 1px;
+    background: linear-gradient(90deg, transparent, #cc0000, #ff4444, #cc0000, transparent);
+    box-shadow: 0 0 8px #ff0000, 0 0 16px rgba(255,0,0,0.4);
+    animation: fadeDown 1.4s ease-out both;
+  }
+
+  /* Main connect button */
+  .connect-btn {
+    font-family: 'Orbitron', monospace;
+    font-weight: 700;
+    font-size: clamp(0.75rem, 2.2vw, 1rem);
+    letter-spacing: 0.14em;
+    color: #ff4444;
+    background: transparent;
+    border: 2px solid #cc0000;
+    padding: 1.1rem 2.5rem;
+    width: min(600px, 90vw);
+    cursor: pointer;
+    position: relative;
+    overflow: hidden;
+    text-transform: uppercase;
+    outline: none;
+    transition: color 0.25s, border-color 0.25s, box-shadow 0.25s;
+    animation: fadeDown 1.6s ease-out both, btnPulse 3s ease-in-out infinite 1.6s;
+    clip-path: polygon(12px 0%, 100% 0%, calc(100% - 12px) 100%, 0% 100%);
+  }
+
+  @keyframes btnPulse {
+    0%, 100% { box-shadow: 0 0 6px rgba(200,0,0,0.5), inset 0 0 6px rgba(200,0,0,0.08); }
+    50%       { box-shadow: 0 0 18px rgba(255,0,0,0.7), inset 0 0 14px rgba(255,0,0,0.12); }
+  }
+
+  .connect-btn::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(90deg, transparent, rgba(255,30,30,0.12), transparent);
+    transform: translateX(-100%);
+    transition: transform 0s;
+  }
+
+  .connect-btn:hover {
+    color: #fff;
+    border-color: #ff3333;
+    box-shadow:
+      0 0 20px rgba(255,0,0,0.8),
+      0 0 40px rgba(255,0,0,0.5),
+      0 0 60px rgba(200,0,0,0.3),
+      inset 0 0 20px rgba(255,0,0,0.15);
+    animation: none;
+    text-shadow: 0 0 8px #fff, 0 0 16px #ff4444;
+  }
+
+  .connect-btn:hover::before {
+    transform: translateX(100%);
+    transition: transform 0.6s ease;
+  }
+
+  .connect-btn:active {
+    transform: scale(0.98);
+  }
+
+  .connect-btn:disabled {
+    pointer-events: none;
+  }
+
+  /* Corner decorations on button */
+  .connect-btn .corner {
+    position: absolute;
+    width: 8px;
+    height: 8px;
+    border-color: #ff4444;
+    border-style: solid;
+  }
+  .connect-btn .corner-tl { top: 3px; left: 16px; border-width: 2px 0 0 2px; }
+  .connect-btn .corner-tr { top: 3px; right: 16px; border-width: 2px 2px 0 0; }
+  .connect-btn .corner-bl { bottom: 3px; left: 16px; border-width: 0 0 2px 2px; }
+  .connect-btn .corner-br { bottom: 3px; right: 16px; border-width: 0 2px 2px 0; }
+
+  /* Status bar */
+  .status-bar {
+    display: flex;
+    gap: 2rem;
+    flex-wrap: wrap;
+    justify-content: center;
+    animation: fadeDown 1.8s ease-out both;
+  }
+
+  .status-item {
+    font-size: 0.7rem;
+    letter-spacing: 0.2em;
+    color: rgba(255,80,80,0.55);
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .status-item .dot {
+    width: 5px;
+    height: 5px;
+    border-radius: 50%;
+    background: #cc2222;
+    box-shadow: 0 0 5px #ff0000;
+    animation: blink 2s ease-in-out infinite;
+  }
+
+  @keyframes blink {
+    0%, 100% { opacity: 1; }
+    50%       { opacity: 0.2; }
+  }
+
+  .status-item:nth-child(2) .dot { animation-delay: 0.6s; }
+  .status-item:nth-child(3) .dot { animation-delay: 1.2s; }
+
+  /* Loading overlay */
+  .loading-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 100;
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 1.5rem;
+    background: rgba(0,0,0,0.85);
+  }
+
+  .loading-overlay.active { display: flex; }
+
+  .loading-text {
+    font-family: 'Orbitron', monospace;
+    font-size: clamp(0.9rem, 2.5vw, 1.3rem);
+    letter-spacing: 0.25em;
+    color: #ff3333;
+    text-shadow: 0 0 12px #ff0000, 0 0 24px rgba(255,0,0,0.5);
+    min-height: 2rem;
+    text-align: center;
+  }
+
+  .progress-track {
+    width: min(500px, 85vw);
+    height: 3px;
+    background: rgba(120,0,0,0.3);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #8b0000, #ff3333, #ff6666);
+    box-shadow: 0 0 8px #ff0000;
+    width: 0%;
+    transition: width 0.3s ease;
+  }
+
+  .progress-label {
+    font-size: 0.65rem;
+    letter-spacing: 0.15em;
+    color: rgba(200,50,50,0.6);
+    text-align: center;
+  }
+
+  /* Success modal */
+  .modal-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 200;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    background: rgba(0,0,0,0.9);
+  }
+
+  .modal-overlay.active { display: flex; }
+
+  .modal {
+    border: 1px solid #cc0000;
+    background: #0a0000;
+    padding: 3rem 2.5rem;
+    width: min(500px, 90vw);
+    text-align: center;
+    box-shadow: 0 0 40px rgba(255,0,0,0.3), inset 0 0 30px rgba(80,0,0,0.2);
+    clip-path: polygon(16px 0%, 100% 0%, calc(100% - 16px) 100%, 0% 100%);
+    animation: modalIn 0.5s ease-out both;
+  }
+
+  @keyframes modalIn {
+    from { opacity: 0; transform: scale(0.9) translateY(20px); }
+    to   { opacity: 1; transform: scale(1) translateY(0); }
+  }
+
+  .modal-title {
+    font-family: 'Orbitron', monospace;
+    font-weight: 900;
+    font-size: 1.3rem;
+    letter-spacing: 0.2em;
+    color: #ff4444;
+    text-shadow: 0 0 12px #ff0000, 0 0 24px rgba(255,0,0,0.5);
+    margin-bottom: 1rem;
+  }
+
+  .modal-sub {
+    font-size: 0.75rem;
+    letter-spacing: 0.15em;
+    color: rgba(200,80,80,0.7);
+    line-height: 1.8;
+    margin-bottom: 2rem;
+  }
+
+  .modal-close {
+    font-family: 'Orbitron', monospace;
+    font-size: 0.7rem;
+    letter-spacing: 0.2em;
+    color: rgba(200,50,50,0.6);
+    background: transparent;
+    border: 1px solid rgba(150,0,0,0.5);
+    padding: 0.6rem 1.8rem;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  .modal-close:hover {
+    color: #fff;
+    border-color: #ff3333;
+    box-shadow: 0 0 12px rgba(255,0,0,0.5);
+  }
+
+  /* Hexagonal emblem bars */
+  .top-bar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 20;
+    height: 3px;
+    background: linear-gradient(90deg, transparent, #8b0000 15%, #ff0000 50%, #8b0000 85%, transparent);
+    box-shadow: 0 0 10px #ff0000;
+  }
+
+  .bottom-bar {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    z-index: 20;
+    height: 3px;
+    background: linear-gradient(90deg, transparent, #8b0000 15%, #ff0000 50%, #8b0000 85%, transparent);
+    box-shadow: 0 0 10px #ff0000;
+  }
+
+  /* Corner UI brackets */
+  .corner-ui {
+    position: fixed;
+    z-index: 20;
+    width: 40px;
+    height: 40px;
+    pointer-events: none;
+  }
+  .corner-ui.tl { top: 12px; left: 12px; border-top: 1px solid rgba(200,0,0,0.5); border-left: 1px solid rgba(200,0,0,0.5); }
+  .corner-ui.tr { top: 12px; right: 12px; border-top: 1px solid rgba(200,0,0,0.5); border-right: 1px solid rgba(200,0,0,0.5); }
+  .corner-ui.bl { bottom: 12px; left: 12px; border-bottom: 1px solid rgba(200,0,0,0.5); border-left: 1px solid rgba(200,0,0,0.5); }
+  .corner-ui.br { bottom: 12px; right: 12px; border-bottom: 1px solid rgba(200,0,0,0.5); border-right: 1px solid rgba(200,0,0,0.5); }
+
+  .subtitle-line {
+    font-size: 0.65rem;
+    letter-spacing: 0.35em;
+    color: rgba(180,40,40,0.5);
+    text-align: center;
+    animation: fadeDown 1.3s ease-out both;
+  }
+</style>
+</head>
+<body>
+
+<!-- Decorative layers -->
+<div class="grid-bg"></div>
+<div class="wave-container">
+  <div class="wave"></div>
+  <div class="wave"></div>
+  <div class="wave"></div>
+  <div class="wave"></div>
+  <div class="wave"></div>
+</div>
+<div class="aura"></div>
+<div class="scanlines"></div>
+
+<!-- Edge chrome -->
+<div class="top-bar"></div>
+<div class="bottom-bar"></div>
+<div class="corner-ui tl"></div>
+<div class="corner-ui tr"></div>
+<div class="corner-ui bl"></div>
+<div class="corner-ui br"></div>
+
+<!-- Main content -->
+<main class="content">
+
+  <!-- Emblem + Title -->
+  <div class="emblem-container">
+    <svg class="emblem-svg" viewBox="0 0 120 120" fill="none" xmlns="http://www.w3.org/2000/svg" aria-label="Imperial Insurgence Emblem">
+      <!-- Outer ring -->
+      <circle cx="60" cy="60" r="56" stroke="white" stroke-width="1.5" stroke-dasharray="6 3" opacity="0.6"/>
+      <!-- Inner ring -->
+      <circle cx="60" cy="60" r="44" stroke="white" stroke-width="0.8" opacity="0.4"/>
+      <!-- Outer hexagon -->
+      <polygon points="60,6 108,33 108,87 60,114 12,87 12,33" stroke="white" stroke-width="1.5" fill="none" opacity="0.7"/>
+      <!-- Inner hex -->
+      <polygon points="60,22 94,41 94,79 60,98 26,79 26,41" stroke="white" stroke-width="0.8" fill="none" opacity="0.4"/>
+      <!-- Star / crosshair -->
+      <line x1="60" y1="10" x2="60" y2="110" stroke="white" stroke-width="0.8" opacity="0.3"/>
+      <line x1="10" y1="60" x2="110" y2="60" stroke="white" stroke-width="0.8" opacity="0.3"/>
+      <line x1="22" y1="22" x2="98" y2="98" stroke="white" stroke-width="0.5" opacity="0.2"/>
+      <line x1="98" y1="22" x2="22" y2="98" stroke="white" stroke-width="0.5" opacity="0.2"/>
+      <!-- Central bold eye / iris -->
+      <circle cx="60" cy="60" r="18" stroke="white" stroke-width="2" fill="none" opacity="0.9"/>
+      <circle cx="60" cy="60" r="10" fill="white" opacity="0.95"/>
+      <circle cx="60" cy="60" r="5"  fill="#0a0000"/>
+      <!-- Tick marks -->
+      <line x1="60" y1="40" x2="60" y2="36" stroke="white" stroke-width="1.5" opacity="0.8"/>
+      <line x1="60" y1="80" x2="60" y2="84" stroke="white" stroke-width="1.5" opacity="0.8"/>
+      <line x1="40" y1="60" x2="36" y2="60" stroke="white" stroke-width="1.5" opacity="0.8"/>
+      <line x1="80" y1="60" x2="84" y2="60" stroke="white" stroke-width="1.5" opacity="0.8"/>
+      <!-- Diamond corners -->
+      <polygon points="60,3 64,9 60,15 56,9" fill="white" opacity="0.7"/>
+      <polygon points="60,105 64,111 60,117 56,111" fill="white" opacity="0.7"/>
+      <polygon points="3,60 9,64 15,60 9,56" fill="white" opacity="0.7"/>
+      <polygon points="105,60 111,64 117,60 111,56" fill="white" opacity="0.7"/>
+    </svg>
+
+    <h1 class="faction-title">THE IMPERIAL INSURGENCE</h1>
+    <p class="subtitle-line">◈ CLASSIFIED NETWORK TERMINAL ◈</p>
+  </div>
+
+  <!-- Divider -->
+  <div class="divider"></div>
+
+  <!-- Connect button -->
+  <button class="connect-btn" id="connectBtn" onclick="startConnection()">
+    <span class="corner corner-tl"></span>
+    <span class="corner corner-tr"></span>
+    <span class="corner corner-bl"></span>
+    <span class="corner corner-br"></span>
+    CONNECT TO EYE OF ARCON SATELLITE &#9659;
+  </button>
+
+  <!-- Divider -->
+  <div class="divider"></div>
+
+  <!-- Metadata footer -->
+  <div class="status-bar">
+    <div class="status-item">
+      <div class="dot"></div>
+      <span>STATUS: OPERATIONAL</span>
+    </div>
+    <div class="status-item">
+      <div class="dot"></div>
+      <span>ACCESS: PUBLIC</span>
+    </div>
+    <div class="status-item">
+      <div class="dot"></div>
+      <span>LOCATION: ARCON SECTOR</span>
+    </div>
+  </div>
+
+</main>
+
+<!-- Loading overlay -->
+<div class="loading-overlay" id="loadingOverlay">
+  <svg class="emblem-svg" viewBox="0 0 120 120" fill="none" xmlns="http://www.w3.org/2000/svg" style="width:70px;height:70px;animation:spin 4s linear infinite">
+    <circle cx="60" cy="60" r="56" stroke="white" stroke-width="1" stroke-dasharray="6 3" opacity="0.4"/>
+    <polygon points="60,6 108,33 108,87 60,114 12,87 12,33" stroke="white" stroke-width="1.2" fill="none" opacity="0.6"/>
+    <circle cx="60" cy="60" r="18" stroke="white" stroke-width="1.5" fill="none" opacity="0.8"/>
+    <circle cx="60" cy="60" r="10" fill="white" opacity="0.9"/>
+    <circle cx="60" cy="60" r="5" fill="#0a0000"/>
+  </svg>
+  <div class="loading-text" id="loadingText">INITIALIZING...</div>
+  <div class="progress-track">
+    <div class="progress-fill" id="progressFill"></div>
+  </div>
+  <div class="progress-label" id="progressLabel">0%</div>
+</div>
+
+<!-- Success modal -->
+<div class="modal-overlay" id="successModal">
+  <div class="modal">
+    <div class="modal-title">⬡ LINK ESTABLISHED ⬡</div>
+    <div class="modal-sub">
+      SATELLITE: EYE OF ARCON — ONLINE<br/>
+      SIGNAL STRENGTH: 98.7% — SECURE<br/>
+      ENCRYPTION: IMPERIAL TIER IV<br/>
+      NODE: ARCON-7 // SECTOR COMMAND<br/>
+      <br/>
+      ALL SYSTEMS NOMINAL. AWAITING ORDERS.
+    </div>
+    <button class="modal-close" onclick="closeModal()">[ CLOSE TERMINAL ]</button>
+  </div>
+</div>
+
+<style>
+  @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+</style>
+
+<script>
+  const LOADING_STEPS = [
+    { text: 'INITIALIZING UPLINK PROTOCOL...', pct: 10 },
+    { text: 'SCANNING ARCON SECTOR...', pct: 22 },
+    { text: 'HANDSHAKE: EYE OF ARCON...', pct: 38 },
+    { text: 'AUTHENTICATING IMPERIAL KEY...', pct: 52 },
+    { text: 'DECRYPTING ORBITAL SIGNAL...', pct: 65 },
+    { text: 'BYPASSING SECTOR FIREWALL...', pct: 78 },
+    { text: 'SYNCHRONIZING SATELLITE FEED...', pct: 90 },
+    { text: 'CONNECTION ESTABLISHED.', pct: 100 },
+  ];
+
+  function startConnection() {
+    const btn = document.getElementById('connectBtn');
+    const overlay = document.getElementById('loadingOverlay');
+    btn.disabled = true;
+    overlay.classList.add('active');
+    runSequence(0);
+  }
+
+  function runSequence(index) {
+    if (index >= LOADING_STEPS.length) {
+      setTimeout(showSuccess, 500);
+      return;
+    }
+    const step = LOADING_STEPS[index];
+    const loadingText = document.getElementById('loadingText');
+    const progressFill = document.getElementById('progressFill');
+    const progressLabel = document.getElementById('progressLabel');
+
+    loadingText.textContent = step.text;
+    progressFill.style.width = step.pct + '%';
+    progressLabel.textContent = step.pct + '%';
+
+    const delay = index === LOADING_STEPS.length - 1 ? 900 : 400 + Math.random() * 300;
+    setTimeout(() => runSequence(index + 1), delay);
+  }
+
+  function showSuccess() {
+    document.getElementById('loadingOverlay').classList.remove('active');
+    document.getElementById('successModal').classList.add('active');
+  }
+
+  function closeModal() {
+    document.getElementById('successModal').classList.remove('active');
+    const btn = document.getElementById('connectBtn');
+    btn.disabled = false;
+    btn.textContent = '';
+
+    const corners = ['tl','tr','bl','br'].map(c => {
+      const s = document.createElement('span');
+      s.className = `corner corner-${c}`;
+      return s;
+    });
+    corners.forEach(c => btn.appendChild(c));
+    btn.append('CONNECT TO EYE OF ARCON SATELLITE ▻');
+  }
+</script>
+</body>
+</html>
